@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Famme Product Manager</title>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .load-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn i {
+            font-size: 1.2em;
+        }
+
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-variants {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #4caf50;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .form-section.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 1.2em;
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><i class="fas fa-shopping-bag"></i> Famme Product Manager</h1>
+    </header>
+
+    <div class="content">
+        <div class="load-section">
+            <button
+                    class="btn"
+                    hx-get="/products/load"
+                    hx-target="#products-table"
+                    hx-swap="innerHTML"
+                    onclick="document.querySelector('.form-section').classList.add('show')">
+                <i class="fas fa-download"></i>
+                Load Products
+                <div class="spinner htmx-indicator"></div>
+            </button>
+        </div>
+
+        <div id="success-message" class="success-message">
+            <i class="fas fa-check-circle"></i> Product added successfully!
+        </div>
+
+        <div class="table-container">
+            <div id="products-table">
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <p>Click "Load Products" to view all products</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-title"><i class="fas fa-plus-circle"></i> Add New Product</h2>
+            <form
+                    hx-post="/products/add"
+                    hx-target="#products-table"
+                    hx-swap="innerHTML"
+                    hx-on::after-request="this.reset(); document.getElementById('success-message').classList.add('show'); setTimeout(function() { document.getElementById('success-message').classList.remove('show'); }, 3000)">
+
+                <div class="form-group">
+                    <label for="title">
+                        <i class="fas fa-tag"></i> Product Title *
+                    </label>
+                    <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            required
+                            placeholder="Enter product title">
+                </div>
+
+                <div class="form-group">
+                    <label for="vendor">
+                        <i class="fas fa-store"></i> Vendor
+                    </label>
+                    <input
+                            type="text"
+                            id="vendor"
+                            name="vendor"
+                            placeholder="Enter vendor name">
+                </div>
+
+                <div class="form-group">
+                    <label for="price">
+                        <i class="fas fa-dollar-sign"></i> Price
+                    </label>
+                    <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            step="0.01"
+                            placeholder="Enter price">
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    Add Product
+                    <div class="spinner htmx-indicator"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

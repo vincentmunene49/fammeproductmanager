@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- This fragment will be returned by HTMX requests -->
+<div th:fragment="products">
+    <table th:if="${not #lists.isEmpty(products)}">
+        <thead>
+        <tr>
+            <th><i class="fas fa-hashtag"></i> ID</th>
+            <th><i class="fas fa-tag"></i> Title</th>
+            <th><i class="fas fa-store"></i> Vendor</th>
+            <th><i class="fas fa-dollar-sign"></i> Price</th>
+            <th><i class="fas fa-boxes"></i> Variants</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.id}">1</td>
+            <td th:text="${product.title}">Product Title</td>
+            <td th:text="${product.vendor} ?: 'N/A'">Vendor</td>
+            <td>
+                <span class="price" th:text="${product.price != null ? '$' + #numbers.formatDecimal(product.price, 1, 2) : 'N/A'}">$99.99</span>
+            </td>
+            <td>
+                <span class="badge badge-variants" th:text="${#lists.size(product.variants)} + ' variants'">5 variants</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+        <i class="fas fa-box-open"></i>
+        <p>No products found</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+POST http://localhost:8080/api/products/sync
+Accept: application/json
+
+### Get all products after sync
+GET http://localhost:8080/api/products
+Accept: application/json
+
+### Get product count
+GET http://localhost:8080/api/products
+Accept: application/json
